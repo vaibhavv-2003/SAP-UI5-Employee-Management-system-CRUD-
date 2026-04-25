@@ -1,0 +1,140 @@
+<!-- <mvc:View controllerName="empmgmt.controller.View1"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m">
+    <Page id="page" title="{i18n>title}">
+    <Panel >
+    <Toolbar>
+            <SearchField
+                width="100%"
+                placeholder="Search Employee"
+                search=".onSearch"/>
+            
+            <Button
+                icon="sap-icon://refresh"
+                tooltip="Refresh"
+                press=".onRefresh"/>
+     </Toolbar>
+
+    <Table id="table1"
+     headerText="Employee table"
+     items="{/EmployeeSet}"
+     growing="true"
+     inset="true"
+     mode="SingleSelectMaster"
+     selectionChange=".onEmpSelect">
+    <columns>
+    <Column ><Text text="EmployeeID"/></Column>
+    <Column ><Text text="First Name"/></Column>
+    <Column ><Text text="Last Name"/></Column>
+    <Column ><Text text="Title"/></Column>
+     <Column ><Text text="City"/></Column>
+    </columns>
+ 
+    <items>
+    <ColumnListItem >
+    <cells>
+    <Text text="{Empid}"/>
+    <Text text="{Fname}"/>
+    <Text text="{Lname}"/>
+    <Text text="{Title}"/>
+    <Text text="{City}"/>
+    </cells>
+    </ColumnListItem>
+    </items>
+ 
+    </Table>
+    </Panel>
+    </Page>
+</mvc:View> -->
+
+<mvc:View
+    controllerName="empmgmt.controller.View1"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m"
+    xmlns:f="sap.f">
+ 
+    <f:DynamicPage id="dynPageView1">
+ 
+       
+        <f:title>
+            <f:DynamicPageTitle>
+                <f:heading>
+                    <Title text="{i18n>title}" />
+                </f:heading>
+            </f:DynamicPageTitle>
+        </f:title>
+ 
+        
+        <f:header>
+            <f:DynamicPageHeader>
+                <Toolbar>
+                    <SearchField
+                        width="100%"
+                        placeholder="{i18n>searchEmployee}"
+                        search=".onSearch" />
+ 
+                    <Button
+                        icon="sap-icon://refresh"
+                        tooltip="{i18n>refresh}"
+                        press=".onRefresh" />
+                </Toolbar>
+            </f:DynamicPageHeader>
+        </f:header>
+ 
+        
+        <f:content>
+            <Table
+                id="table1"
+                headerText="Employee Table"
+                items="{/EmployeeSet}"
+                growing="true"
+                inset="false"
+                mode="MultiSelect"
+                itemPress=".onEmpSelect"
+                    selectionChange=".onSelectionChange">
+ 
+             <headerToolbar>
+                    <Toolbar id='toolBar'>
+                        <Title id="title" text="Do your CRUD here>" level="H2" />
+                        <ToolbarSpacer id="toolbarSpacer"/>
+                        <Button id="createButton" text="Create" icon="sap-icon://add" press=".onCreatePress" type="Emphasized"/>
+                        <Button id="editButton" text="Edit" icon="sap-icon://edit" press=".onEditPress" enabled="false"/>
+                        <Button id="deleteButton" text="Delete" icon="sap-icon://delete" press=".onDeletePress" enabled="false" type="Reject"/>
+                    </Toolbar>
+                </headerToolbar>
+                
+                <columns>
+                    <Column>
+                        <Text text="EmpId"/>
+                    </Column>
+                    <Column>
+                        <Text text="First Name"/>
+                    </Column>
+                    <Column>
+                        <Text text="Last Name"/>
+                    </Column>
+                    <Column>
+                        <Text text="Title" />
+                    </Column>
+                    <Column>
+                        <Text text="City" />
+                    </Column>
+                </columns>
+ 
+                <items>
+                    <ColumnListItem id="columnListItems" type="Navigation" press=".onEmpSelect">
+                        <cells>
+                            <Text text="{Empid}" />
+                            <Text text="{Fname}" />
+                            <Text text="{Lname}" />
+                            <Text text="{Title}" />
+                            <Text text="{City}" />
+                        </cells>
+                    </ColumnListItem>
+                </items>
+ 
+            </Table>
+        </f:content>
+ 
+    </f:DynamicPage>
+</mvc:View>

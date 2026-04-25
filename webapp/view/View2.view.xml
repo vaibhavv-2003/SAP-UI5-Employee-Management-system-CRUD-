@@ -1,0 +1,50 @@
+<mvc:View
+    controllerName="empmgmt.controller.View2"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m"
+    xmlns:f="sap.f">
+ 
+    <f:DynamicPage id="dynPageView2">
+ 
+        <!-- ===== Page Title with Back Button ===== -->
+        <f:title>
+            <f:DynamicPageTitle>
+ 
+                <f:navigationActions>
+                    <Button
+                        icon="sap-icon://nav-back"
+                        press=".onNavBack" />
+                </f:navigationActions>
+ 
+                <f:heading>
+                    <Title text="Employee Details" />
+                </f:heading>
+ 
+            </f:DynamicPageTitle>
+        </f:title>
+ 
+        <!-- ===== Page Content (SINGLE ROOT CONTROL) ===== -->
+        <f:content>
+ 
+            <VBox width="100%">
+ 
+                <ObjectHeader
+                    icon="sap-icon://person-placeholder"
+                    title="{Fname} {Lname}" />
+ 
+                <List inset="true">
+                    <StandardListItem title="EmpId" description="{Empid}" />
+                    <StandardListItem title="First Name" description="{Fname}" />
+                    <StandardListItem title="Last Name" description="{Lname}" />
+                    <StandardListItem title="Title" description="{Title}" />
+                    <StandardListItem title="City" description="{City}" />
+                    <StandardListItem title="Address" description="{Address}" />
+                    <StandardListItem title="Notes" description="{Notes}" />
+                </List>
+ 
+            </VBox>
+ 
+        </f:content>
+ 
+    </f:DynamicPage>
+</mvc:View>

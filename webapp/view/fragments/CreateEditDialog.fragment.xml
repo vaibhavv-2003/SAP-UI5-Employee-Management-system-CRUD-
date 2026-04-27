@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core">
+    <Dialog id="createEditDialog" title="{viewModel>/dialogTitle}" contentWidth="500px" draggable="true" resizable="true" >
+        <content>
+            <VBox id="dialogBox" class="sapUiMediumMargin">
+                <Label id="docLabel" text="Employee ID:"/>
+                <Input id="documentInput" value="{Empid}" maxLength="10" enabled="{viewModel>/isCreate}" />
+               
+                <Label text="First Name:"/>
+                <Input value="{Fname}" maxLength="20" />
+                               
+                <Label text="Last Name:"/>
+                <Input value="{Lname}" maxLength="20"/>
+               
+                <Label text="Title:"/>
+                <Input value="{Title}" maxLength="20"/>
+ 
+                <Label text="City:"/>
+                <Input value="{City}" maxLength="15"/>
+               
+                <Label  text="Date of Birth:"/>
+                <DatePicker  value="{
+                    path: 'Dob',
+                    type: 'sap.ui.model.type.Date'
+                }"/>
+                             
+                <Label text="Address:"/>
+                <Input value="{Address}" maxLength="30"/>
+ 
+                <Label text="Notes:"/>
+                <Input value="{Notes}" maxLength="20"/>          
+            </VBox>
+        </content>
+        <beginButton>
+            <Button id="saveBtn" text="{viewModel>/saveButtonText}" press=".onSavePress" type="Emphasized"/>
+        </beginButton>
+        <endButton>
+            <Button id="cancelBtn" text="Cancel" press=".onCancelPress"/>
+        </endButton>
+    </Dialog>
+</core:FragmentDefinition>
+ 

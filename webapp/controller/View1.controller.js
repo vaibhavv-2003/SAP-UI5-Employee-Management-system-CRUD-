@@ -16,6 +16,11 @@ sap.ui.define([
         onInit() {
             // Get the main OData model from the component and set it to the view
             let oModel = this.getOwnerComponent().getModel();
+            // new line of code experimenting for multiple entry delete 
+            oModel.setUseBatch(true); // enable for not batch mode for immediate operations
+            // we are now creating a que like group to store our requests
+            // 🚩🚩oModel.setDeferredGroups(["deleteGroup"]); // create a group for delete operations
+            // this is casuing problem with create also with premature creation when clicked on the address column
             this.getView().setModel(oModel);
  
             // Create a JSON model for dialog state (used for create/edit dialog)
@@ -138,7 +143,7 @@ sap.ui.define([
                 title: "Confirm Deletion",
                 onClose: (oAction) => {
                     if (oAction === MessageBox.Action.OK) {
-                        this._deletePurchaseOrders(aSelectedItems);
+                        this._deleteEmployee(aSelectedItems);
                     }
                 }
             });
@@ -188,7 +193,7 @@ sap.ui.define([
             this._oDialog.open();
         },
  
-        // Save purchase order (create or update)
+        // Save employee (create or update)
         onSavePress() {
             const oModel = this.getView().getModel();
             const oViewModel = this.getView().getModel("viewModel");
@@ -222,35 +227,75 @@ sap.ui.define([
             this._oDialog.close();
         },
  
-        // Delete selected purchase orders
-        _deletePurchaseOrders(aSelectedItems) {
-            const oModel = this.getView().getModel();
-            let iDeletedCount = 0;
-            const iTotalCount = aSelectedItems.length;
+        // Delete selected employees
+        // _deleteEmployee(aSelectedItems) {
+        //     const oModel = this.getView().getModel();
+        //     let iDeletedCount = 0;
+        //     const iTotalCount = aSelectedItems.length;
            
-            // Loop through selected items and remove them
-            aSelectedItems.forEach((oItem) => {
-                const oBindingContext = oItem.getBindingContext();
-                oModel.remove(oBindingContext.getPath(), {
-                    success: () => {
-                        iDeletedCount++;
-                        // Show success message after all deletions
-                        if (iDeletedCount === iTotalCount) {
-                            const sMessage = iTotalCount === 1 ?
-                                "Employee deleted successfully" :
-                                `${iTotalCount} Employees deleted successfully`;
-                            MessageToast.show(sMessage);
-                            this._refreshTable();
-                        }
-                    },
-                    error: (oError) => {
-                        MessageToast.show("Failed to delete Employee");
-                        console.error("Delete Error:", oError);
-                    }
+        //     // Loop through selected items and remove them
+        //     aSelectedItems.forEach((oItem) => {
+        //         const oBindingContext = oItem.getBindingContext();
+        //         oModel.remove(oBindingContext.getPath(), 
+                
+        //         {
+        //             success: () => {
+        //                 iDeletedCount++;
+        //                 // Show success message after all deletions
+        //                 if (iDeletedCount === iTotalCount) {
+        //                     const sMessage = iTotalCount === 1 ?
+        //                         "Employee deleted successfully" :
+        //                         `${iTotalCount} Employees deleted successfully`;
+        //                     MessageToast.show(sMessage);
+        //                     this._refreshTable();
+        //                 }
+        //             },
+        //             error: (oError) => {
+        //                 MessageToast.show("Failed to delete Employee");
+        //                 console.error("Delete Error:", oError);
+        //             }
+        //         });
+        //     });
+        // },
+ 
+
+_deleteEmployee(aSelectedItems) {
+    const oModel = this.getView().getModel();
+
+    // Mark each selected row for deletion, note: this 3 lines of code works but const variable ocontext is not used anywhere else, so we can remove it and directly use oItem.getBindingContext() in the remove method, this is just for better readability and understanding
+    // aSelectedItems.forEach(oItem => {
+    //     const oContext = oItem.getBindingContext();
+    //     oModel.remove(oContext.getPath(), { groupId: "deleteGroup" });
+    // });
+
+    aSelectedItems.forEach((oItem) => {
+                oModel.remove(oItem.getBindingContext().getPath(), {
+                    groupId: "deleteGroup"
                 });
             });
-        },
  
+
+    // Submit all deletes together
+    oModel.submitChanges({
+        groupId: "deleteGroup",
+        success: () => {
+            const iCount = aSelectedItems.length;
+            MessageToast.show(
+                iCount === 1
+                    ? "Employee deleted successfully"
+                    : `${iCount} Employees deleted successfully`
+            );
+            this._refreshTable();
+        },
+        error: (oError) => {
+            MessageBox.error("Failed to delete selected Employees");
+            console.error("Batch Delete Error:", oError);
+        }
+    });
+},
+
+
+
         // Refresh table binding and reset selection state
         _refreshTable() {
             const oTable = this.byId("table1");

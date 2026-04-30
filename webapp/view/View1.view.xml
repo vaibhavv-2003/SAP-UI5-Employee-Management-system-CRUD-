@@ -69,14 +69,19 @@
             <f:DynamicPageHeader>
                 <Toolbar>
                     <SearchField
-                        width="100%"
+                        id="searchField"
+                        width="30%"
                         placeholder="{i18n>searchEmployee}"
                         search=".onSearch" />
- 
-                    <Button
+                        <Button
                         icon="sap-icon://refresh"
                         tooltip="{i18n>refresh}"
                         press=".onRefresh" />
+<!-- 
+                        <ToolbarSpacer id="toolbarSpacer"/>
+                        <Button id="createButton" text="Create" icon="sap-icon://add" press=".onCreatePress" type="Emphasized"/>
+                        <Button id="editButton" text="Edit" icon="sap-icon://edit" press=".onEditPress" enabled="false"/>
+                        <Button id="deleteButton" text="Delete" icon="sap-icon://delete" press=".onDeletePress" enabled="false" type="Reject"/> -->
                 </Toolbar>
             </f:DynamicPageHeader>
         </f:header>
@@ -85,6 +90,7 @@
         <f:content>
             <Table
                 id="table1"
+                growingThreshold="10"
                 headerText="Employee Table"
                 items="{/EmployeeSet}"
                 growing="true"

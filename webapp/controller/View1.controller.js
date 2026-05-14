@@ -30,6 +30,18 @@ sap.ui.define([
                 isCreate: false        // Flag to indicate create vs edit mode
             });
             this.getView().setModel(oViewModel, "viewModel");
+
+            // new line of code experiment:
+            oModel.read("/EmployeeSet", {
+                success: (oData) => {
+                    MessageToast.show("Initial Employee Data loaded successfully.");
+                    console.log("Initial Employee Data:", oData);
+                },
+                error: (oError) => {
+                    MessageToast.show("Failed to load initial Employee data.");
+                    console.error("Error loading initial data:", oError);
+                }
+            });
  
         },
  

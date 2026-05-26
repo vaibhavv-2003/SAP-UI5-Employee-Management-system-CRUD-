@@ -31,77 +31,201 @@ sap.ui.define([
             });
             this.getView().setModel(oViewModel, "viewModel");
 
-            // new line of code experiment:
-            oModel.read("/EmployeeSet", {
-                success: (oData) => {
-                    MessageToast.show("Initial Employee Data loaded successfully.");
-                    console.log("Initial Employee Data:", oData);
-                },
-                error: (oError) => {
-                    MessageToast.show("Failed to load initial Employee data.");
-                    console.error("Error loading initial data:", oError);
-                }
-            });
+            
+            // ✅ NEW: Filter state
+            this._oSearchFilter = null;
+            this._oCityFilter = null;
+
+
+            // new line of code experiment: commenting this on 26th 05
+        //     oModel.read("/EmployeeSet", {
+        //         success: (oData) => {
+        //             MessageToast.show("Initial Employee Data loaded successfully.");
+        //             console.log("Initial Employee Data:", oData);
+        //         },
+        //         error: (oError) => {
+        //             MessageToast.show("Failed to load initial Employee data.");
+        //             console.error("Error loading initial data:", oError);
+        //         }
+        //     });
  
+        // },
+
+      // Filtering the cities for combo box, we want to show only unique cities in the combo box, so we are reading the employee set and then extracting the unique cities from it and then setting it to the combo box model, this is done in the onInit method so that it is done only once when the view is initialized and not every time when the user changes the city selection, this is a common practice to optimize performance and reduce unnecessary calls to the backend  
+    oModel.read("/EmployeeSet", {
+        success: (oData) => {
+            // Normalize + dedupe
+            const aUniqueCities = [
+                ...new Map(
+                    oData.results.map(item => {
+                        const normalized = item.City?.toUpperCase().trim();
+                        return [normalized, { City: normalized }];
+                    })
+                ).values()
+            ];
+
+            // Sort nicely
+            aUniqueCities.sort((a, b) => a.City.localeCompare(b.City));
+
+            // Set to JSON model
+            const oCityModel = new sap.ui.model.json.JSONModel(aUniqueCities);
+            this.getView().setModel(oCityModel, "cityModel");
+        }
+    });
         },
+
+        // OLD WORKING CODE:
  
-        onSearch: function (oEvent) {
+        // onSearch: function (oEvent) {
+        //     const sQuery = oEvent.getParameter("query");
+        //     const oTable = this.byId("table1");
+        //     const oBinding = oTable.getBinding("items");
+ 
+        //     //handing the edge case here, if the binding is not there then we can't do anything, so we return
+        //     if (!oBinding) {
+        //         return;
+        //     }
+ 
+        //     if (!sQuery) {
+        //         oBinding.filter([], "Application");
+        //         return;
+        //     }
+ 
+        //     // EXACT match with backend
+        //     const oFilter = new Filter(
+        //         "Fname",
+        //         FilterOperator.EQ,  
+        //         sQuery
+        //     );
+ 
+        //     // This WILL appear in URL in Payload, this url will be sent to your backedn and data will be filtered in the backend and only the matching data will be sent to the frontend, this is called server side filtering
+        //     // Control bucket and Application bucket, application bucket is used for filtering in the frontend and control bucket is used for filtering in the frontend, if you want to do client side filtering then you can use control bucket and if you want to do server side filtering then you can use application bucket
+        //     oBinding.filter([oFilter], "Application");
+        // },
+
+        
+        // 🔄 CHANGED: now stores filter instead of applying directly
+        onSearch(oEvent) {
             const sQuery = oEvent.getParameter("query");
-            const oTable = this.byId("table1");
-            const oBinding = oTable.getBinding("items");
- 
-            //handing the edge case here, if the binding is not there then we can't do anything, so we return
-            if (!oBinding) {
-                return;
-            }
- 
+
             if (!sQuery) {
-                oBinding.filter([], "Application");
-                return;
+                this._oSearchFilter = null;   // ✅ NEW
+            } else {
+                this._oSearchFilter = new Filter(   // ✅ NEW
+                    "Fname",
+                    FilterOperator.EQ,
+                    sQuery
+                );
             }
- 
-            // EXACT match with backend
-            const oFilter = new Filter(
-                "Fname",
-                FilterOperator.EQ,  
-                sQuery
-            );
- 
-            // This WILL appear in URL in Payload, this url will be sent to your backedn and data will be filtered in the backend and only the matching data will be sent to the frontend, this is called server side filtering
-            // Control bucket and Application bucket, application bucket is used for filtering in the frontend and control bucket is used for filtering in the frontend, if you want to do client side filtering then you can use control bucket and if you want to do server side filtering then you can use application bucket
-            oBinding.filter([oFilter], "Application");
+
+            this._applyFilters();  // ✅ NEW
         },
- 
-        onRefresh: function () {
+
+       
+        
+        // ✅ NEW: ComboBox filter handler
+        onCityChange(oEvent) {
+            const sCity = oEvent.getParameter("selectedItem")?.getKey();
+
+            if (!sCity) {
+                this._oCityFilter = null;
+            } else {
+                this._oCityFilter = new Filter(
+                    "City",
+                    FilterOperator.EQ,
+                    sCity
+                );
+            }
+
+            this._applyFilters();  // ✅ NEW
+        },
+
+        
+      // ✅ NEW: central filter logic (MOST IMPORTANT)
+        _applyFilters() {
             const oTable = this.byId("table1");
-            this.byId("searchField").setValue("");
             const oBinding = oTable.getBinding("items");
+
+            if (!oBinding) return;
+
+            const aFilters = [];
+
+            if (this._oSearchFilter) {
+                aFilters.push(this._oSearchFilter);
+            }
+
+            if (this._oCityFilter) {
+                aFilters.push(this._oCityFilter);
+            }
+
+            oBinding.filter(aFilters, "Application");
+        },
+
+
+
+//  // OLD WORKING CODE FOR REFRESH:
+//         onRefresh: function () {
+//             const oTable = this.byId("table1");
+//             this.byId("searchField").setValue("");
+//             const oBinding = oTable.getBinding("items");
  
-            // Clear filters
+//             // Clear filters
+//             oBinding.filter([], "Application");
+ 
+//             // Force backend reload
+//             this.getView().getModel().refresh(true);
+ 
+//             // Clear Selections
+//             oTable.removeSelections();
+//         },
+
+
+    // 🔄 CHANGED: reset both filters
+        onRefresh() {
+            const oTable = this.byId("table1");
+
+            this.byId("searchField").setValue("");
+            this.byId("cityCombo").setSelectedKey(""); // ✅ NEW
+
+            this._oSearchFilter = null;  // ✅ NEW
+            this._oCityFilter = null;    // ✅ NEW
+
+            const oBinding = oTable.getBinding("items");
             oBinding.filter([], "Application");
- 
-            // Force backend reload
+
             this.getView().getModel().refresh(true);
- 
-            // Clear Selections
             oTable.removeSelections();
         },
+
+//  // OLD CODE FOR onEMPSELECT:
+//         onEmpSelect: function (oEvent) {
+//             //oItem is just a instance like a structure of the table item
+//             const oItem = oEvent.getParameter("listItem");
+//             // oCtx is the context of the item, it contains the data of the item, it is like a pointer to the data of the item, to liknk this instance and data we use the Binding context.
+//             const oCtx = oItem.getBindingContext();
+//               // whatever empid we have selected will be store in sEmpId
+//               // Whatever empid was stored in the variable sEmpId will be passed to the route as a parameter,index.html to index.html#/Employees/101
+//             const sEmpId = oCtx.getProperty("Empid");
  
-        onEmpSelect: function (oEvent) {
-            //oItem is just a instance like a structure of the table item
-            const oItem = oEvent.getParameter("listItem");
-            // oCtx is the context of the item, it contains the data of the item, it is like a pointer to the data of the item, to liknk this instance and data we use the Binding context.
+//             const oRouter = UIComponent.getRouterFor(this);
+//             oRouter.navTo("RouteView2", {
+//                 // Whatever empid was stored in the variable sEmpId will be passed to the route as a parameter,index.html to index.html#/Employees/101
+//                 Empid: sEmpId
+//             });
+//         },
+
+
+          onEmpSelect(oEvent) {
+            const oItem = oEvent.getParameter("listItem") || oEvent.getSource(); // ✅ CHANGED
             const oCtx = oItem.getBindingContext();
-              // whatever empid we have selected will be store in sEmpId
-              // Whatever empid was stored in the variable sEmpId will be passed to the route as a parameter,index.html to index.html#/Employees/101
             const sEmpId = oCtx.getProperty("Empid");
- 
+
             const oRouter = UIComponent.getRouterFor(this);
             oRouter.navTo("RouteView2", {
-                // Whatever empid was stored in the variable sEmpId will be passed to the route as a parameter,index.html to index.html#/Employees/101
                 Empid: sEmpId
             });
         },
+
  
         // Handle table row selection changes
         onSelectionChange(oEvent) {

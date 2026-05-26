@@ -51,7 +51,8 @@
     controllerName="empmgmt.controller.View1"
     xmlns:mvc="sap.ui.core.mvc"
     xmlns="sap.m"
-    xmlns:f="sap.f">
+    xmlns:f="sap.f"
+    xmlns:core="sap.ui.core">
  
     <f:DynamicPage id="dynPageView1">
  
@@ -73,6 +74,27 @@
                         width="30%"
                         placeholder="{i18n>searchEmployee}"
                         search=".onSearch" />
+
+            <ComboBox
+                id="cityCombo"
+                width="20%"
+                placeholder="Filter by City"
+                selectionChange=".onCityChange"
+                showClearIcon="true"
+                items="{
+                            path: 'cityModel>/'
+                        }">
+
+                <!-- Default option -->
+                <core:Item key="" text="All Cities" />
+
+                <!-- Bound items -->
+                <core:Item key="{cityModel>City}" text="{cityModel>City}" />
+            </ComboBox>
+
+            <!-- Spacer to push refresh right -->
+            <ToolbarSpacer />
+
                         <Button
                         icon="sap-icon://refresh"
                         tooltip="{i18n>refresh}"
@@ -82,6 +104,7 @@
                         <Button id="createButton" text="Create" icon="sap-icon://add" press=".onCreatePress" type="Emphasized"/>
                         <Button id="editButton" text="Edit" icon="sap-icon://edit" press=".onEditPress" enabled="false"/>
                         <Button id="deleteButton" text="Delete" icon="sap-icon://delete" press=".onDeletePress" enabled="false" type="Reject"/> -->
+
                 </Toolbar>
             </f:DynamicPageHeader>
         </f:header>
@@ -101,7 +124,7 @@
  
              <headerToolbar>
                     <Toolbar id='toolBar'>
-                        <Title id="title" text="Do your CRUD here>" level="H2" />
+                        <Title id="title" text="Do your CRUD here" level="H2" />
                         <ToolbarSpacer id="toolbarSpacer"/>
                         <Button id="createButton" text="Create" icon="sap-icon://add" press=".onCreatePress" type="Emphasized"/>
                         <Button id="editButton" text="Edit" icon="sap-icon://edit" press=".onEditPress" enabled="false"/>
